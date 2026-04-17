@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emailer Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #e0e7ff;
+      --secondary: #3f37c9;
+      --accent: #f72585;
+      --success: #4cc9f0;
+      --warning: #f8961e;
+      --danger: #ef233c;
+      --dark: #2b2d42;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --sidebar-width: 260px;
+      --header-height: 70px;
+      --transition: all 0.3s ease;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f7fb;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* Header Styles */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      padding: 0 1rem;
+      box-shadow: var(--shadow-sm);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      gap: 0.5rem;
+    }
+
+    .logo-icon {
+      font-size: 1.5rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .new-patch-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      box-shadow: 0 2px 5px rgba(67, 97, 238, 0.3);
+      font-size: 0.9rem;
+    }
+
+    .new-patch-btn span {
+      display: inline-block;
+    }
+
+    .new-patch-btn:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .profile-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      width: 200px;
+      padding: 0.5rem 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      transform: translateY(10px);
+    }
+
+    .profile:hover .profile-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .profile-menu-item {
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: var(--transition);
+    }
+
+    .profile-menu-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .profile-menu-divider {
+      height: 1px;
+      background: var(--gray-light);
+      margin: 0.5rem 0;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary-light);
+    }
+
+    .profile-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: inline-block;
+    }
+
+    .profile-arrow {
+      transition: var(--transition);
+      font-size: 0.8rem;
+    }
+
+    .profile:hover .profile-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Dashboard Layout */
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+      padding-top: var(--header-height);
+    }
+
+    /* Sidebar Styles */
+    aside {
+      width: var(--sidebar-width);
+      background: white;
+      border-right: 1px solid var(--gray-light);
+      height: calc(100vh - var(--header-height));
+      position: fixed;
+      overflow-y: auto;
+      transition: var(--transition);
+      z-index: 90;
+    }
+
+    .sidebar-content {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .sidebar-search {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-light);
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      transition: var(--transition);
+      background: var(--light);
+    }
+
+    .sidebar-search:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    nav ul {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    nav ul li {
+      margin-bottom: 0.25rem;
+    }
+
+    nav ul li a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    nav ul li a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    nav ul li a.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      position: relative;
+    }
+
+    nav ul li a.active:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .nav-icon {
+      width: 18px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-light);
+    }
+
+    .bulk-action {
+      width: 100%;
+      background: var(--light);
+      color: var(--dark);
+      border: 1px solid var(--gray-light);
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .bulk-action:hover {
+      background: var(--gray-light);
+    }
+
+    /* Main Content Styles */
+    main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 1.5rem;
+      transition: var(--transition);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: 1px solid var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--secondary);
+      border-color: var(--secondary);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-light {
+      background: var(--light);
+      color: var(--dark);
+      border: 1px solid var(--gray-light);
+    }
+
+    .btn-light:hover {
+      background: var(--gray-light);
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 600px;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--gray);
+      background: var(--light);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background: var(--primary-light);
+    }
+
+    .status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .status.sent {
+      background: rgba(76, 201, 240, 0.1);
+      color: #4cc9f0;
+    }
+
+    .status.scheduled {
+      background: rgba(248, 150, 30, 0.1);
+      color: #f8961e;
+    }
+
+    .status.draft {
+      background: rgba(108, 117, 125, 0.1);
+      color: var(--gray);
+    }
+
+    .status.completed {
+      background: rgba(67, 97, 238, 0.1);
+      color: var(--primary);
+    }
+
+    .status.failed {
+      background: rgba(239, 35, 60, 0.1);
+      color: var(--danger);
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray);
+      transition: var(--transition);
+      font-size: 0.9rem;
+      padding: 0.4rem;
+      border-radius: 50%;
+    }
+
+    .action-btn:hover {
+      background: var(--gray-light);
+    }
+
+    .action-btn.edit:hover {
+      color: var(--primary);
+    }
+
+    .action-btn.delete:hover {
+      color: var(--danger);
+    }
+
+    .action-btn.duplicate:hover {
+      color: var(--warning);
+    }
+
+    .action-btn.preview:hover {
+      color: var(--success);
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.4rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    /* Welcome Card */
+    .welcome-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-card:after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 150px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+
+    .welcome-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .welcome-text {
+      opacity: 0.9;
+      margin-bottom: 1.25rem;
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .welcome-actions {
+      display: flex;
+      gap: 0.75rem;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 1200px) {
+      :root {
+        --sidebar-width: 220px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      aside {
+        transform: translateX(-100%);
+      }
+
+      aside.active {
+        transform: translateX(0);
+      }
+
+      main {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .new-patch-btn span,
+      .profile-name {
+        display: none;
+      }
+
+      .profile-arrow {
+        display: none;
+      }
+
+      .profile-menu {
+        right: -10px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .page-actions {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+
+      .welcome-card {
+        padding: 1.25rem;
+      }
+
+      .welcome-title {
+        font-size: 1.3rem;
+      }
+
+      .welcome-actions .btn {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .card-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 576px) {
+      header {
+        padding: 0 0.75rem;
+      }
+
+      main {
+        padding: 1rem;
+      }
+
+      .logo span {
+        display: none;
+      }
+
+      .logo-icon {
+        font-size: 1.3rem;
+      }
+
+      .welcome-card:after {
+        display: none;
+      }
+
+      .welcome-actions .btn {
+        min-width: 100%;
+      }
+
+      .profile-menu {
+        width: 180px;
+      }
+    }
+
+    /* Menu Toggle Button */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--dark);
+      margin-right: 0.5rem;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    /* Overlay for mobile sidebar */
+    .sidebar-overlay {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 80;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="logo">
+      <i class="fas fa-paper-plane logo-icon"></i>
+      <span>AutoMailer</span>
+    </div>
+    <div class="header-actions">
+      <button class="new-patch-btn">
+        <i class="fas fa-plus"></i>
+        <span>New Campaign</span>
+      </button>
+      <div class="profile">
+        <img src="https://i.pravatar.cc/40" alt="User" class="avatar"/>
+        <span class="profile-name">Alex Johnson</span>
+        <i class="fas fa-chevron-down profile-arrow"></i>
+        <div class="profile-menu">
+          <div class="profile-menu-item">
+            <i class="fas fa-user"></i>
+            <span>My Profile</span>
+          </div>
+          <div class="profile-menu-item">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </div>
+          <div class="profile-menu-divider"></div>
+          <div class="profile-menu-item">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="dashboard">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside id="sidebar">
+      <div class="sidebar-content">
+        <input type="text" placeholder="Search campaigns..." class="sidebar-search"/>
+        <nav>
+          <ul>
+            <li>
+              <a href="#" class="active">
+                <i class="fas fa-inbox nav-icon"></i>
+                <span>Inbox</span>
+                <span class="badge" style="margin-left: auto;">3</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-paper-plane nav-icon"></i>
+                <span>Sent</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-clock nav-icon"></i>
+                <span>Scheduled</span>
+                <span class="badge" style="margin-left: auto;">2</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-file nav-icon"></i>
+                <span>Drafts</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-trash nav-icon"></i>
+                <span>Trash</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-chart-line nav-icon"></i>
+                <span>Analytics</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-users nav-icon"></i>
+                <span>Contacts</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-tags nav-icon"></i>
+                <span>Templates</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="bulk-action">
+            <i class="fas fa-tasks"></i>
+            <span>Bulk Actions</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+    <main>
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <div class="page-actions">
+          <button class="btn btn-outline">
+            <i class="fas fa-filter"></i>
+            <span>Filter</span>
+          </button>
+          <button class="btn btn-outline">
+            <i class="fas fa-download"></i>
+            <span>Export</span>
+          </button>
+          <button class="btn btn-outline">
+            <i class="fas fa-columns"></i>
+            <span>Columns</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="welcome-card animate-fade">
+        <h2 class="welcome-title">Welcome back, Alex!</h2>
+        <p class="welcome-text">You have 2 scheduled campaigns and 1 draft waiting to be sent. Check your analytics to see how your last campaign performed.</p>
+        <div class="welcome-actions">
+          <button class="btn btn-light">
+            <i class="fas fa-chart-line"></i>
+            <span>View Analytics</span>
+          </button>
+          <button class="btn btn-light">
+            <i class="fas fa-plus"></i>
+            <span>Quick Campaign</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card animate-fade" style="animation-delay: 0.1s;">
+        <div class="card-header">
+          <h3 class="card-title">Recent Campaigns</h3>
+          <div class="card-actions">
+            <button class="btn btn-sm btn-light">
+              <i class="fas fa-sync-alt"></i>
+              <span>Refresh</span>
+            </button>
+            <button class="btn btn-sm btn-outline">
+              <i class="fas fa-columns"></i>
+              <span>Columns</span>
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Sent Date</th>
+                <th>Recipients</th>
+                <th>Open Rate</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- <tr>
+                <td>
+                  <strong>Summer Sale Launch</strong>
+                  <div style="font-size: 0.8rem; color: var(--gray);">Promotional</div>
+                </td>
+                <td>2025-07-25</td>
+                <td>1,250</td>
+                <td>42.5%</td>
+                <td><span class="status completed">Completed</span></td>
+                <td>
+                  <button class="action-btn preview" title="Preview">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr> -->
+                <td>
+                  <strong>Welcome New Users</strong>
+                  <div style="font-size: 0.8rem; color: var(--gray);">Transactional</div>
+                </td>
+                <td>Scheduled</td>
+                <td>850</td>
+                <td>-</td>
+                <td><span class="status scheduled">Scheduled</span></td>
+                <td>
+                  <button class="action-btn preview" title="Preview">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Q3 Newsletter</strong>
+                  <div style="font-size: 0.8rem; color: var(--gray);">Newsletter</div>
+                </td>
+                <td>Draft</td>
+                <td>2,150</td>
+                <td>-</td>
+                <td><span class="status draft">Draft</span></td>
+                <td>
+                  <button class="action-btn preview" title="Preview">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Abandoned Cart</strong>
+                  <div style="font-size: 0.8rem; color: var(--gray);">Automated</div>
+                </td>
+                <td>2025-07-20</td>
+                <td>320</td>
+                <td>18.7%</td>
+                <td><span class="status sent">Sent</span></td>
+                <td>
+                  <button class="action-btn preview" title="Preview">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Toggle sidebar on mobile
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('active');
+      sidebarOverlay.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking overlay
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 992) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+          sidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
+        }
+      }
+    });
+
+    // Smooth transitions
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.card, .welcome-card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+      });
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
